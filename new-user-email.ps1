@@ -6,10 +6,14 @@ $Username = "from_email"
 $Password = 'secure_password'
 $Cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $Username, ($Password | ConvertTo-SecureString -AsPlainText -Force)
 #переменная для получения даты
-$createdSinceDate = ((Get-Date).AddDays(-1)).Date
+$StartTime = (Get-Date).AddDays(-1).AddHours(9)  # Время начала проверки (например, 9:00 вчера)
+$EndTime = (Get-Date).AddHours(9)               # Время конца проверки (9:00 сегодня)
+
 #определим OU
 $OU = "OU=test,DC=example,DC=com"
-$users = Get-ADUser -Filter {whenCreated -ge $createdSinceDate} -Properties whenCreated,mail -SearchBase $ou
+$users = Get-ADUser -Filter {
+    whenCreated -ge $StartTime -and whenCreated -lt $EndTime
+} -Properties whenCreated,mail -SearchBase $OU
 
 foreach ($User in $Users) {
 #зададим переменные для имени и почты, т.к. прямое указание через $user. не работает внутри
